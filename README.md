@@ -10,6 +10,8 @@
 
 **A zero-setup, local sandbox for testing LaTeX code snippets with complex mathematical equations directly in your browser.** </div>
 
+---
+
 Say goodbye to heavy, gigabyte-sized TeX installations just to test a single equation. **LaTeX-Sandbox** is a sleek, IDE-like environment built for researchers, students, and developers who need to write, execute, and preview LaTeX snippets instantly. 
 
 ---
