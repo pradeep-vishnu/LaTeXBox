@@ -15,7 +15,7 @@ Say goodbye to heavy, gigabyte-sized TeX installations just to test a single equ
 * 🔒 **100% Local Sandbox:** No backend, no server-side rendering, and no accounts. Your LaTeX code never leaves your machine. It renders entirely within your browser.
 * 💸 **Completely Free & Open Source:** No subscriptions, no API keys, no hidden limits. Just pure mathematics.
 * 🎨 **Intuitive:** Designed with a modern, dark-mode coding aesthetic (inspired by VSCode/IntelliJ) to keep you focused.
-* ⚡ **Zero Setup:** No build steps or installations required. Just open the [⨋LaTeXBox]([https://pradeep-vishnu.github.io/LaTeXBox/]) file and start typing.
+* ⚡ **Zero Setup:** No build steps or installations required. Just open the [⨋LaTeXBox](https://pradeep-vishnu.github.io/LaTeXBox/) file and start typing.
 
 ---
 
@@ -33,7 +33,7 @@ Say goodbye to heavy, gigabyte-sized TeX installations just to test a single equ
 
 You are literally seconds away from testing your LaTeX snippet. 
 
-1. Online: Click here [⨋LaTeXBox]([https://pradeep-vishnu.github.io/LaTeXBox/])
+1. Online: Click here [⨋LaTeXBox](https://pradeep-vishnu.github.io/LaTeXBox/)
 
 
 2. **Clone the repository:**
