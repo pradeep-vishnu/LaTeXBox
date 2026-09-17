@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaTeXBox</title>
+    
+    <!-- CodeMirror Editor Core and Theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-ocean.min.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                tags: 'ams',
+                macros: {
+                    argmax: ['\\mathop{\\mathrm{arg\\,max}}'],
+                    argmin: ['\\mathop{\\mathrm{arg\\,min}}']
+                }
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <!-- MathJax Library -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+    <!-- CodeMirror LaTeX Mode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/stex/stex.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --panel-bg: #1a1c29;
+            --border-color: #2c2f40;
+            --accent-color: #00e5ff;
+            --accent-hover: #00b3cc;
+            --error-color: #ff5252;
+            --text-color: #e0e0e0;
+            --header-height: 60px;
+            --footer-height: 50px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            height: var(--header-height);
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .branding {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .branding .icon {
+            color: var(--accent-color);
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        button.primary {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+        }
+
+        button.primary:hover {
+            background-color: var(--accent-hover);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        }
+
+        /* --- Main Workspace --- */
+        .workspace {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - var(--header-height) - var(--footer-height));
+        }
+
+        .editor-container {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .CodeMirror {
+            flex: 1;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            height: 100% !important;
+        }
+
+        .preview-container {
+            width: 50%;
+            background-color: #12141c;
+            padding: 40px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #preview-content {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #d8dee9;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Run Animation */
+        @keyframes pulseUpdate {
+            0% { opacity: 0.3; transform: scale(0.99); filter: brightness(1.2); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+        }
+        .anim-update {
+            animation: pulseUpdate 0.4s ease-out;
+        }
+
+        #preview-content p {
+            margin-bottom: 1.5em;
+            text-align: justify;
+        }
+
+        mjx-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px 0;
+        }
+
+        .latex-cite {
+            color: var(--accent-color);
+            font-family: sans-serif;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        .latex-cite:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Footer / Status Bar --- */
+        footer {
+            height: var(--footer-height);
+            background-color: var(--panel-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 0.85rem;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a0aabf;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4caf50;
+        }
+
+        .status-dot.error { background-color: var(--error-color); }
+        .status-dot.processing { background-color: #ff9800; }
+
+        .error-message {
+            display: none;
+            color: var(--error-color);
+            background: rgba(255, 82, 82, 0.1);
+            padding: 4px 12px;
+            border-radius: 4px;
+            border-left: 2px solid var(--error-color);
+        }
+        
+        .suggestion {
+            color: #e0e0e0;
+            font-style: italic;
+            margin-left: 8px;
+        }
+
+        .last-run {
+            color: #6c7693;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #3c4059; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #50567a; }
+
+        @media (max-width: 900px) {
+            .workspace { flex-direction: column; }
+            .editor-container { width: 100%; height: 50%; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .preview-container { width: 100%; height: 50%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="branding">
+            <span class="icon">∑</span> LaTeX Playground
+        </div>
+        <div class="controls">
+            <span style="font-size: 0.75rem; color: #888; align-self: center; margin-right: 10px;">Shortcut: Cmd/Ctrl + Enter</span>
+            <button onclick="resetSnippet()">Reset Example</button>
+            <button onclick="clearEditor()">Clear</button>
+            <button class="primary" onclick="renderLatex()" id="run-btn">Run</button>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <div class="editor-container">
+            <textarea id="editor"></textarea>
+        </div>
+        <div class="preview-container">
+            <div id="preview-content" class="tex2jax_process"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-left">
+            <div class="status" id="status-indicator">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Ready</span>
+            </div>
+            <div class="error-message" id="error-panel">
+                <strong id="error-title">⚠ Syntax Issue:</strong>
+                <span id="error-text"></span>
+                <span class="suggestion" id="error-suggestion"></span>
+            </div>
+        </div>
+        <div class="last-run" id="last-run-display">Last run: --:--:--</div>
+    </footer>
+
+    <script>
+        const initialSnippet = `The foundation of general relativity is encapsulated in the Einstein Field Equations, which describe how mass and energy warp spacetime \\cite{Einstein1915}. The equations are elegantly expressed as:
+
+\\begin{equation}
+    R_{\\mu \\nu} - \\frac{1}{2} R g_{\\mu \\nu} + \\Lambda g_{\\mu \\nu} = \\frac{8 \\pi G}{c^4} T_{\\mu \\nu}
+    \\label{eq:einstein_field}
+\\end{equation}
+
+where $R_{\\mu \\nu}$ is the Ricci curvature tensor, $R$ is the scalar curvature, $g_{\\mu \\nu}$ is the metric tensor, $\\Lambda$ is the cosmological constant, and $T_{\\mu \\nu}$ is the stress-energy tensor.
+
+In quantum mechanics, the time-dependent Schrödinger equation governs the wave function $\\Psi(\\mathbf{r}, t)$ of a quantum-mechanical system:
+
+\\begin{equation}
+    i \\hbar \\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r}, t) = \\left [ - \\frac{\\hbar^2}{2m} \\nabla^2 + V(\\mathbf{r}, t) \\right ] \\Psi(\\mathbf{r}, t)
+    \\label{eq:schrodinger}
+\\end{equation}
+
+For fluid dynamics, the incompressible Navier-Stokes equations define the motion of viscous fluid substances. It represents the conservation of momentum:
+
+\\begin{equation}
+    \\rho \\left( \\frac{\\partial \\mathbf{u}}{\\partial t} + \\mathbf{u} \\cdot \\nabla \\mathbf{u} \\right) = - \\nabla p + \\mu \\nabla^2 \\mathbf{u} + \\mathbf{f}
+    \\label{eq:navier_stokes}
+\\end{equation}
+
+subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring mass conservation.`;
+
+        // Initialize CodeMirror
+        const editorElement = document.getElementById('editor');
+        const editor = CodeMirror.fromTextArea(editorElement, {
+            mode: "stex",
+            theme: "material-ocean",
+            lineNumbers: true,
+            lineWrapping: true,
+            tabSize: 4,
+            extraKeys: {
+                "Cmd-Enter": function() { renderLatex(); },
+                "Ctrl-Enter": function() { renderLatex(); }
+            }
+        });
+        
+        editor.setValue(initialSnippet);
+
+        // Global Keyboard Shortcut (catches Cmd/Ctrl+Enter even outside editor)
+        document.addEventListener('keydown', function(event) {
+            if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                event.preventDefault();
+                renderLatex();
+            }
+        });
+
+        function setStatus(state) {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            const errorPanel = document.getElementById('error-panel');
+
+            dot.className = 'status-dot ' + state;
+            
+            if (state === 'processing') {
+                text.innerText = 'Rendering...';
+                errorPanel.style.display = 'none';
+            } else if (state === 'error') {
+                text.innerText = 'Render completed with warnings';
+            } else {
+                text.innerText = 'Render successful';
+                errorPanel.style.display = 'none';
+            }
+        }
+
+        function updateLastRunTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour12: false });
+            document.getElementById('last-run-display').innerText = `Last run: ${timeString}`;
+        }
+
+        function displayError(rawErrorMsg) {
+            setStatus('error');
+            const errorPanel = document.getElementById('error-panel');
+            const errorText = document.getElementById('error-text');
+            const errorSuggestion = document.getElementById('error-suggestion');
+            
+            errorPanel.style.display = 'block';
+            errorText.innerText = rawErrorMsg;
+
+            let suggestion = "Suggested fix: Check for typos in your LaTeX commands.";
+            if (rawErrorMsg.includes("Missing closing brace") || rawErrorMsg.includes("Extra open brace")) {
+                suggestion = "Suggested fix: Ensure all opening '{' have a matching closing '}'.";
+            } else if (rawErrorMsg.includes("Missing \\right")) {
+                suggestion = "Suggested fix: Every '\\left' needs a matching '\\right'. Use '\\right.' if you want it invisible.";
+            } else if (rawErrorMsg.includes("Unknown environment")) {
+                suggestion = "Suggested fix: Check the spelling of your environment name (e.g., \\begin{equation}).";
+            } else if (rawErrorMsg.includes("Undefined control sequence")) {
+                suggestion = "Suggested fix: A command (backslash) you used is not defined or misspelled.";
+            } else if (rawErrorMsg.includes("Missing \\end")) {
+                suggestion = "Suggested fix: Ensure your \\begin{...} has a corresponding \\end{...}.";
+            } else if (rawErrorMsg.includes("Multiple label")) {
+                suggestion = "Suggested fix: You have used the same \\label{} name multiple times. Labels must be unique.";
+            }
+
+            errorSuggestion.innerText = suggestion;
+        }
+
+        function preprocessLatexText(rawText) {
+            let processed = rawText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            processed = processed.replace(/\\cite{([^}]+)}/g, '<span class="latex-cite" title="Citation placeholder">[Cite: $1]</span>');
+            const paragraphs = processed.split(/\n\s*\n/);
+            return paragraphs.map(p => `<p>${p}</p>`).join('');
+        }
+
+        function triggerAnimation(element) {
+            element.classList.remove("anim-update");
+            void element.offsetWidth; // Trigger DOM reflow to restart animation
+            element.classList.add("anim-update");
+        }
+
+        function renderLatex() {
+            const rawText = editor.getValue();
+            const preview = document.getElementById('preview-content');
+            
+            setStatus('processing');
+            triggerAnimation(preview); // Play visual update pulse
+            
+            preview.innerHTML = preprocessLatexText(rawText);
+
+            if (window.MathJax && MathJax.typesetPromise) {
+                // Clear the TeX cache (equation numbers, tags, labels) before re-rendering
+                if (MathJax.texReset) {
+                    MathJax.texReset(); 
+                }
+                
+                MathJax.typesetClear([preview]);
+                MathJax.typesetPromise([preview]).then(() => {
+                    const mjErrors = preview.querySelectorAll('[data-mjx-error]');
+                    if (mjErrors.length > 0) {
+                        const errorMsg = mjErrors[0].getAttribute('data-mjx-error') || mjErrors[0].getAttribute('title');
+                        displayError(errorMsg);
+                    } else {
+                        setStatus('');
+                    }
+                    updateLastRunTime();
+                }).catch((err) => {
+                    displayError(err.message);
+                    updateLastRunTime();
+                });
+            } else {
+                setTimeout(renderLatex, 500); 
+            }
+        }
+
+        function clearEditor() {
+            editor.setValue("");
+            editor.focus();
+        }
+
+        function resetSnippet() {
+            editor.setValue(initialSnippet);
+            renderLatex();
+        }
+
+        // Initial render
+        window.addEventListener('load', () => {
+            setTimeout(renderLatex, 300);
+        });
+
+    </script>
+</body>
+</html>
