@@ -1,6 +1,8 @@
-# ⨋ LaTeXBox
+<div align="center"> 
+   
+   # ⨋ LaTeXBox 
 
-<img width="1000px" src="demo.png" alt="Demo Image"> </div>
+<img width="1000px" src="demo.png" alt="Demo Image"> 
 
 ![CI Status](https://img.shields.io/badge/build-passing-success?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
@@ -8,7 +10,7 @@
 
 **A zero-setup, local sandbox for testing LaTeX code snippets with complex mathematical equations directly in your browser.**
 
-Say goodbye to heavy, gigabyte-sized TeX installations just to test a single equation. **LaTeX-Sandbox** is a sleek, IDE-like environment built for researchers, students, and developers who need to write, execute, and preview LaTeX snippets instantly.
+Say goodbye to heavy, gigabyte-sized TeX installations just to test a single equation. **LaTeX-Sandbox** is a sleek, IDE-like environment built for researchers, students, and developers who need to write, execute, and preview LaTeX snippets instantly. </div>
 
 ---
 
