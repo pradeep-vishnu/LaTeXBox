@@ -235,11 +235,11 @@
         }
         
         #error-panel[hidden] {
-            display: none;
+            display: none !important;
         }
 
         #error-panel:not([hidden]) {
-            display: block;
+            display: block !important;
         }
         
         .suggestion {
@@ -338,21 +338,21 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
             lineWrapping: true,
             tabSize: 4,
             extraKeys: {
-                "Cmd-Enter": function() { renderLatex().catch(e => displayError(e.message)); },
-                "Ctrl-Enter": function() { renderLatex().catch(e => displayError(e.message)); }
+                "Cmd-Enter": function() { renderLatex(); },
+                "Ctrl-Enter": function() { renderLatex(); }
             }
         });
         
         editor.setValue(initialSnippet);
 
         document.getElementById('run-btn').addEventListener('click', () => {
-            renderLatex().catch(e => displayError(e.message));
+            renderLatex();
         });
 
         document.addEventListener('keydown', function(event) {
             if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
                 event.preventDefault();
-                renderLatex().catch(e => displayError(e.message));
+                renderLatex();
             }
         });
 
@@ -366,12 +366,14 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
             if (state === 'processing') {
                 text.innerText = 'Rendering...';
                 errorPanel.hidden = true;
+                errorPanel.setAttribute('hidden', 'true');
                 errorPanel.style.display = 'none';
             } else if (state === 'error') {
                 text.innerText = 'Render failed';
             } else {
                 text.innerText = 'Render successful';
                 errorPanel.hidden = true;
+                errorPanel.setAttribute('hidden', 'true');
                 errorPanel.style.display = 'none';
             }
         }
@@ -389,21 +391,22 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
             const errorSuggestion = document.getElementById('error-suggestion');
             
             errorPanel.hidden = false;
-            errorPanel.style.display = '';
-            errorText.innerText = rawErrorMsg;
+            errorPanel.removeAttribute('hidden');
+            errorPanel.style.display = 'block';
+            errorText.innerText = rawErrorMsg || 'Unknown rendering error.';
 
             let suggestion = "Suggested fix: Check for missing braces, brackets, or LaTeX commands.";
-            if (rawErrorMsg.includes("Missing closing brace") || rawErrorMsg.includes("Extra open brace")) {
+            if (rawErrorMsg && (rawErrorMsg.includes("Missing closing brace") || rawErrorMsg.includes("Extra open brace"))) {
                 suggestion = "Suggested fix: Ensure all opening '{' have a matching closing '}'.";
-            } else if (rawErrorMsg.includes("Missing \\right")) {
+            } else if (rawErrorMsg && rawErrorMsg.includes("Missing \\right")) {
                 suggestion = "Suggested fix: Every '\\left' needs a matching '\\right'. Use '\\right.' if you want it invisible.";
-            } else if (rawErrorMsg.includes("Unknown environment")) {
+            } else if (rawErrorMsg && rawErrorMsg.includes("Unknown environment")) {
                 suggestion = "Suggested fix: Check the spelling of your environment name (e.g., \\begin{equation}).";
-            } else if (rawErrorMsg.includes("Undefined control sequence")) {
+            } else if (rawErrorMsg && rawErrorMsg.includes("Undefined control sequence")) {
                 suggestion = "Suggested fix: A command (backslash) you used is not defined or misspelled.";
-            } else if (rawErrorMsg.includes("Missing \\end")) {
+            } else if (rawErrorMsg && rawErrorMsg.includes("Missing \\end")) {
                 suggestion = "Suggested fix: Ensure your \\begin{...} has a corresponding \\end{...}.";
-            } else if (rawErrorMsg.includes("Multiple label")) {
+            } else if (rawErrorMsg && rawErrorMsg.includes("Multiple label")) {
                 suggestion = "Suggested fix: You have used the same \\label{} name multiple times. Labels must be unique.";
             }
 
@@ -439,11 +442,10 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
                 
                 MathJax.typesetClear([preview]);
                 
-            try {
+                try {
                     await MathJax.typesetPromise([preview]);
                     
-                    // Support both MathJax 2 (.merror) and MathJax 3 error structures
-                    const mathJaxError = preview.querySelector('.merror, [data-mjx-error], mjx-merror');
+                    const mathJaxError = preview.querySelector('.merror, .mjx-error, [data-mjx-error], mjx-merror');
                     if (mathJaxError) {
                         const errMsg = mathJaxError.getAttribute('data-mjx-error') 
                             || mathJaxError.getAttribute('title') 
@@ -451,15 +453,20 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
                             || 'Invalid LaTeX';
                         throw new Error(errMsg);
                     }
-                    
+
+                    const rawContent = preview.textContent || '';
+                    if (rawContent.includes('\\begin{') || rawContent.includes('\\frac{') || rawContent.includes('\\end{')) {
+                        throw new Error('Missing closing brace or unclosed environment');
+                    }
+
                     setStatus('');
                     updateLastRunTime();
                 } catch (err) {
-                    displayError(err.message);
+                    displayError(err.message || 'Unknown render error');
                     updateLastRunTime();
                 }
             } else {
-                setTimeout(() => renderLatex().catch(e => displayError(e.message)), 500); 
+                setTimeout(() => renderLatex(), 500); 
             }
         }
 
@@ -470,11 +477,11 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
 
         function resetSnippet() {
             editor.setValue(initialSnippet);
-            renderLatex().catch(e => displayError(e.message));
+            renderLatex();
         }
 
         window.addEventListener('load', () => {
-            setTimeout(() => renderLatex().catch(e => displayError(e.message)), 300);
+            setTimeout(() => renderLatex(), 300);
         });
 
     </script>
