@@ -1,4 +1,4 @@
-# ⨋ LaTeX Playground
+# ⨋ LaTeXBox
 
 ![CI Status](https://img.shields.io/badge/build-passing-success?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
@@ -10,12 +10,12 @@ Say goodbye to heavy, gigabyte-sized TeX installations just to test a single equ
 
 ---
 
-## ✨ Why use LaTeX-Sandbox?
+## ✨ Why use LaTeXBox?
 
 * 🔒 **100% Local Sandbox:** No backend, no server-side rendering, and no accounts. Your LaTeX code never leaves your machine. It renders entirely within your browser.
 * 💸 **Completely Free & Open Source:** No subscriptions, no API keys, no hidden limits. Just pure mathematics.
 * 🎨 **Intuitive:** Designed with a modern, dark-mode coding aesthetic (inspired by VSCode/IntelliJ) to keep you focused.
-* ⚡ **Zero Setup:** No build steps or installations required. Just open the [Latex-Sandbox]([(https://pradeep-vishnu.github.io/)) file and start typing.
+* ⚡ **Zero Setup:** No build steps or installations required. Just open the [LaTeXBox]([(https://pradeep-vishnu.github.io/)) file and start typing.
 
 ---
 
@@ -38,6 +38,6 @@ You are literally seconds away from testing your LaTeX snippet.
 
 2. **Clone the repository:**
    ```bash
-   git clone []
+   git clone [https://github.com/pradeep-vishnu/LaTeXBox.git]
 
    
