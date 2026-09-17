@@ -8,9 +8,9 @@
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)
 ![Zero Backend](https://img.shields.io/badge/backend-zero-purple?style=flat-square)
 
-**A zero-setup, local sandbox for testing LaTeX code snippets with complex mathematical equations directly in your browser.**
+**A zero-setup, local sandbox for testing LaTeX code snippets with complex mathematical equations directly in your browser.** </div>
 
-Say goodbye to heavy, gigabyte-sized TeX installations just to test a single equation. **LaTeX-Sandbox** is a sleek, IDE-like environment built for researchers, students, and developers who need to write, execute, and preview LaTeX snippets instantly. </div>
+Say goodbye to heavy, gigabyte-sized TeX installations just to test a single equation. **LaTeX-Sandbox** is a sleek, IDE-like environment built for researchers, students, and developers who need to write, execute, and preview LaTeX snippets instantly. 
 
 ---
 
