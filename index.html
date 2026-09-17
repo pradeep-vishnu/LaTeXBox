@@ -439,12 +439,19 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
                 
                 MathJax.typesetClear([preview]);
                 
-                try {
+            try {
                     await MathJax.typesetPromise([preview]);
-                    const mathJaxError = preview.querySelector('.merror');
+                    
+                    // Support both MathJax 2 (.merror) and MathJax 3 error structures
+                    const mathJaxError = preview.querySelector('.merror, [data-mjx-error], mjx-merror');
                     if (mathJaxError) {
-                        throw new Error(mathJaxError.textContent || 'Invalid LaTeX');
+                        const errMsg = mathJaxError.getAttribute('data-mjx-error') 
+                            || mathJaxError.getAttribute('title') 
+                            || mathJaxError.textContent 
+                            || 'Invalid LaTeX';
+                        throw new Error(errMsg);
                     }
+                    
                     setStatus('');
                     updateLastRunTime();
                 } catch (err) {
