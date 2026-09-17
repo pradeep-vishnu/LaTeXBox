@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LaTeXBox</title>
     
-    <!-- CodeMirror Editor Core and Theme -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-ocean.min.css">
     
-    <!-- MathJax Configuration -->
     <script>
         window.MathJax = {
             tex: {
@@ -30,10 +28,8 @@
             }
         };
     </script>
-    <!-- MathJax Library -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     
-    <!-- CodeMirror LaTeX Mode -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/stex/stex.min.js"></script>
     
@@ -66,7 +62,6 @@
             overflow: hidden;
         }
 
-        /* --- Header --- */
         header {
             height: var(--header-height);
             background-color: var(--panel-bg);
@@ -125,7 +120,6 @@
             box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
         }
 
-        /* --- Main Workspace --- */
         .workspace {
             display: flex;
             flex: 1;
@@ -165,11 +159,11 @@
             margin: 0 auto;
         }
 
-        /* Run Animation */
         @keyframes pulseUpdate {
             0% { opacity: 0.3; transform: scale(0.99); filter: brightness(1.2); }
             100% { opacity: 1; transform: scale(1); filter: brightness(1); }
         }
+        
         .anim-update {
             animation: pulseUpdate 0.4s ease-out;
         }
@@ -191,11 +185,11 @@
             font-size: 0.9em;
             cursor: pointer;
         }
+        
         .latex-cite:hover {
             text-decoration: underline;
         }
 
-        /* --- Footer / Status Bar --- */
         footer {
             height: var(--footer-height);
             background-color: var(--panel-bg);
@@ -240,6 +234,14 @@
             border-left: 2px solid var(--error-color);
         }
         
+        #error-panel[hidden] {
+            display: none;
+        }
+
+        #error-panel:not([hidden]) {
+            display: block;
+        }
+        
         .suggestion {
             color: #e0e0e0;
             font-style: italic;
@@ -274,7 +276,7 @@
             <span style="font-size: 0.75rem; color: #888; align-self: center; margin-right: 10px;">Shortcut: Cmd/Ctrl + Enter</span>
             <button onclick="resetSnippet()">Reset Example</button>
             <button onclick="clearEditor()">Clear</button>
-            <button class="primary" onclick="renderLatex()" id="run-btn">Run</button>
+            <button class="primary" id="run-btn">Run</button>
         </div>
     </header>
 
@@ -328,7 +330,6 @@ For fluid dynamics, the incompressible Navier-Stokes equations define the motion
 
 subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring mass conservation.`;
 
-        // Initialize CodeMirror
         const editorElement = document.getElementById('editor');
         const editor = CodeMirror.fromTextArea(editorElement, {
             mode: "stex",
@@ -337,18 +338,21 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
             lineWrapping: true,
             tabSize: 4,
             extraKeys: {
-                "Cmd-Enter": function() { renderLatex(); },
-                "Ctrl-Enter": function() { renderLatex(); }
+                "Cmd-Enter": function() { renderLatex().catch(e => displayError(e.message)); },
+                "Ctrl-Enter": function() { renderLatex().catch(e => displayError(e.message)); }
             }
         });
         
         editor.setValue(initialSnippet);
 
-        // Global Keyboard Shortcut (catches Cmd/Ctrl+Enter even outside editor)
+        document.getElementById('run-btn').addEventListener('click', () => {
+            renderLatex().catch(e => displayError(e.message));
+        });
+
         document.addEventListener('keydown', function(event) {
             if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
                 event.preventDefault();
-                renderLatex();
+                renderLatex().catch(e => displayError(e.message));
             }
         });
 
@@ -361,11 +365,13 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
             
             if (state === 'processing') {
                 text.innerText = 'Rendering...';
+                errorPanel.hidden = true;
                 errorPanel.style.display = 'none';
             } else if (state === 'error') {
-                text.innerText = 'Render completed with warnings';
+                text.innerText = 'Render failed';
             } else {
                 text.innerText = 'Render successful';
+                errorPanel.hidden = true;
                 errorPanel.style.display = 'none';
             }
         }
@@ -382,10 +388,11 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
             const errorText = document.getElementById('error-text');
             const errorSuggestion = document.getElementById('error-suggestion');
             
-            errorPanel.style.display = 'block';
+            errorPanel.hidden = false;
+            errorPanel.style.display = '';
             errorText.innerText = rawErrorMsg;
 
-            let suggestion = "Suggested fix: Check for typos in your LaTeX commands.";
+            let suggestion = "Suggested fix: Check for missing braces, brackets, or LaTeX commands.";
             if (rawErrorMsg.includes("Missing closing brace") || rawErrorMsg.includes("Extra open brace")) {
                 suggestion = "Suggested fix: Ensure all opening '{' have a matching closing '}'.";
             } else if (rawErrorMsg.includes("Missing \\right")) {
@@ -412,41 +419,40 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
 
         function triggerAnimation(element) {
             element.classList.remove("anim-update");
-            void element.offsetWidth; // Trigger DOM reflow to restart animation
+            void element.offsetWidth; 
             element.classList.add("anim-update");
         }
 
-        function renderLatex() {
+        async function renderLatex() {
             const rawText = editor.getValue();
             const preview = document.getElementById('preview-content');
             
             setStatus('processing');
-            triggerAnimation(preview); // Play visual update pulse
+            triggerAnimation(preview); 
             
             preview.innerHTML = preprocessLatexText(rawText);
 
             if (window.MathJax && MathJax.typesetPromise) {
-                // Clear the TeX cache (equation numbers, tags, labels) before re-rendering
                 if (MathJax.texReset) {
                     MathJax.texReset(); 
                 }
                 
                 MathJax.typesetClear([preview]);
-                MathJax.typesetPromise([preview]).then(() => {
-                    const mjErrors = preview.querySelectorAll('[data-mjx-error]');
-                    if (mjErrors.length > 0) {
-                        const errorMsg = mjErrors[0].getAttribute('data-mjx-error') || mjErrors[0].getAttribute('title');
-                        displayError(errorMsg);
-                    } else {
-                        setStatus('');
+                
+                try {
+                    await MathJax.typesetPromise([preview]);
+                    const mathJaxError = preview.querySelector('.merror');
+                    if (mathJaxError) {
+                        throw new Error(mathJaxError.textContent || 'Invalid LaTeX');
                     }
+                    setStatus('');
                     updateLastRunTime();
-                }).catch((err) => {
+                } catch (err) {
                     displayError(err.message);
                     updateLastRunTime();
-                });
+                }
             } else {
-                setTimeout(renderLatex, 500); 
+                setTimeout(() => renderLatex().catch(e => displayError(e.message)), 500); 
             }
         }
 
@@ -457,12 +463,11 @@ subject to the continuity equation $\\nabla \\cdot \\mathbf{u} = 0$, ensuring ma
 
         function resetSnippet() {
             editor.setValue(initialSnippet);
-            renderLatex();
+            renderLatex().catch(e => displayError(e.message));
         }
 
-        // Initial render
         window.addEventListener('load', () => {
-            setTimeout(renderLatex, 300);
+            setTimeout(() => renderLatex().catch(e => displayError(e.message)), 300);
         });
 
     </script>
