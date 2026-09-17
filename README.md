@@ -1,5 +1,7 @@
 # ⨋ LaTeXBox
 
+<img width="1000px" src="demo.png" alt="Demo Image"> </div>
+
 ![CI Status](https://img.shields.io/badge/build-passing-success?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
 ![Zero Backend](https://img.shields.io/badge/backend-zero-purple?style=flat-square)
