@@ -5,7 +5,7 @@
 <img width="1000px" src="demo.png" alt="Demo Image"> 
 
 ![CI Status](https://img.shields.io/badge/build-passing-success?style=flat-square)
-![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)
 ![Zero Backend](https://img.shields.io/badge/backend-zero-purple?style=flat-square)
 
 **A zero-setup, local sandbox for testing LaTeX code snippets with complex mathematical equations directly in your browser.**
