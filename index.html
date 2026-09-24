@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LaTeXBox</title>
+    <!-- 1. Optimized Title Tag -->
+    <title>Run LaTeX Code Snippets Online - LaTeXBox</title>
+    
+    <!-- 2. Meta Description added for search intent -->
+    <meta name="description" content="Compile, preview, and run LaTeX code snippets online directly in your browser. Free web-based LaTeX editor and sandbox with real-time rendering.">
+    
+    <!-- 3. Canonical Tag (Replace with your actual GitHub Pages URL) -->
+    <link rel="canonical" href="https://yourusername.github.io/your-repo-name/" />
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300e5ff'>∑</text></svg>">
     
@@ -54,14 +61,14 @@
             padding: 0;
         }
 
+        /* Removed overflow: hidden so search engines can read content below the fold */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         header {
@@ -74,16 +81,18 @@
             padding: 0 20px;
         }
 
-        .branding {
+        /* Converted branding to h1 for SEO */
+        h1.branding {
             display: flex;
             align-items: center;
             gap: 10px;
             font-weight: 600;
             font-size: 1.1rem;
             letter-spacing: 0.5px;
+            margin: 0;
         }
 
-        .branding .icon {
+        h1.branding .icon {
             color: var(--accent-color);
             font-size: 1.4rem;
             font-weight: bold;
@@ -125,7 +134,7 @@
         .workspace {
             display: flex;
             flex: 1;
-            height: calc(100vh - var(--header-height) - var(--footer-height));
+            min-height: calc(100vh - var(--header-height) - var(--footer-height));
         }
 
         .editor-container {
@@ -256,6 +265,28 @@
             font-size: 0.9rem;
         }
 
+        /* 4. Added SEO Content styling below the app fold */
+        .seo-content {
+            padding: 40px;
+            background-color: var(--bg-color);
+            border-top: 1px solid var(--border-color);
+            color: #a0aabf;
+            max-width: 1200px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .seo-content h2 {
+            color: var(--text-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .seo-content p {
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: var(--bg-color); }
         ::-webkit-scrollbar-thumb { background: #3c4059; border-radius: 5px; }
@@ -271,9 +302,10 @@
 <body>
 
     <header>
-        <div class="branding">
-            <span class="icon">∑</span> LaTeX Playground
-        </div>
+        <!-- Converted this div to an h1 to properly index the primary title -->
+        <h1 class="branding">
+            <span class="icon">∑</span> Run LaTeX Code Snippets Online
+        </h1>
         <div class="controls">
             <span style="font-size: 0.75rem; color: #888; align-self: center; margin-right: 10px;">Shortcut: Cmd/Ctrl + Enter</span>
             <button onclick="resetSnippet()">Reset Example</button>
@@ -305,6 +337,13 @@
         </div>
         <div class="last-run" id="last-run-display">Last run: --:--:--</div>
     </footer>
+
+    <!-- 5. Added crawlable text content for search engines -->
+    <section class="seo-content">
+        <h2>How to Compile LaTeX Online</h2>
+        <p>LaTeXBox is a free tool designed to let you write, compile, and <strong>run LaTeX code snippets online</strong> instantly. Whether you are testing math equations, formatting a table, or writing a block of general relativity equations, our browser-based editor provides real-time rendering without requiring any software installation.</p>
+        <p>Simply type your LaTeX code into the editor on the left and hit <strong>Run</strong> (or press Cmd/Ctrl + Enter). The compiler processes standard environments like <code>\begin{equation}</code> and complex macros out of the box.</p>
+    </section>
 
     <script>
         const initialSnippet = `The foundation of general relativity is encapsulated in the Einstein Field Equations, which describe how mass and energy warp spacetime \\cite{Einstein1915}. The equations are elegantly expressed as:
